@@ -49,11 +49,11 @@ public class TEAM_JORTS_SQUAD : MonoBehaviour
     private int lastHealth2;
     private int lastHealth3;
 
-    private ObjectiveScript middleObjective;
-    private ObjectiveScript leftObjective;
-    private ObjectiveScript rightObjective;
+    static private ObjectiveScript middleObjective;
+    static private ObjectiveScript leftObjective;
+    static private ObjectiveScript rightObjective;
 
-    private team ourTeamColor;
+    static private team ourTeamColor;
 
     private Action moveToLeft;
     private Action moveToMiddle;
@@ -432,7 +432,7 @@ public class TEAM_JORTS_SQUAD : MonoBehaviour
     }
 
     // returns the number of objectives our team controls
-    int getNumberOfObjectivesWeHave() {
+    static int getNumberOfObjectivesWeHave() {
         int count = 0;
         if (leftObjective.getControllingTeam () == ourTeamColor) {
             count++;
@@ -447,7 +447,7 @@ public class TEAM_JORTS_SQUAD : MonoBehaviour
     }
 
     // returns the number of objectives the other team controls
-    int getNumberOfObjectivesTheyHave() {
+    static int getNumberOfObjectivesTheyHave() {
         int count = 0;
         team otherTeamColor = (ourTeamColor == team.blue) ? team.red : team.blue;
         if (leftObjective.getControllingTeam () == otherTeamColor) {
@@ -750,6 +750,24 @@ public class TEAM_JORTS_SQUAD : MonoBehaviour
         public override bool shouldPrune(CharacterScript character)
         {
             return objective.getControllingTeam() == character.getTeam();
+        }
+    }
+
+    class WaitUntilLosingAction : Action
+    {
+        public override bool isComplete(CharacterScript character)
+        {
+            return getNumberOfObjectivesTheyHave() >= getNumberOfObjectivesWeHave();
+        }
+
+        public override float timeToComplete(CharacterScript character, bool isCurrentAction, Vector3 previousPos)
+        {
+            return 0;
+        }
+
+        public override bool shouldPrune(CharacterScript character)
+        {
+            return false;
         }
     }
 }
