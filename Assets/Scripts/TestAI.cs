@@ -222,10 +222,6 @@ public class TEAM_JORTS_SQUAD : MonoBehaviour
     // Performs the first action in the action queue, dequeuing actions that are completed
     void handleActions(CharacterScript character, LinkedList<Action> actions)
     {
-        if(character1 == character && actions.Count > 0)
-        {
-            Debug.Log(actions.First.Value.GetType() + " " + actions.Count);
-        }
         pruneList(actions, character);
         if (actions.Count > 0)
         {
