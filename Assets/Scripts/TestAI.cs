@@ -53,6 +53,8 @@ public class TEAM_JORTS_SQUAD : MonoBehaviour
     private ObjectiveScript leftObjective;
     private ObjectiveScript rightObjective;
 
+    private team ourTeamColor;
+
     private Action moveToLeft;
     private Action moveToMiddle;
     private Action moveToRight;
@@ -89,6 +91,8 @@ public class TEAM_JORTS_SQUAD : MonoBehaviour
         moveToLeft = new MoveAction (leftObjective.transform.position);
         moveToMiddle = new MoveAction (middleObjective.transform.position);
         moveToRight = new MoveAction (rightObjective.transform.position);
+
+        ourTeamColor = character1.getTeam ();
 
         charActions[character1.name] = character1Actions = new LinkedList<Action>();
         charActions[character2.name] = character2Actions = new LinkedList<Action>();
@@ -130,6 +134,7 @@ public class TEAM_JORTS_SQUAD : MonoBehaviour
     // Update() is called every frame
     void Update()
     {
+        Debug.Log (getNumberOfObjectivesTheyHave () + " " + getNumberOfObjectivesWeHave ());
         determineHealthChange();
         isBeingShot();
 
@@ -403,6 +408,38 @@ public class TEAM_JORTS_SQUAD : MonoBehaviour
             faceRelative(character, characterTransform, angle);
         }
     }
+
+    // returns the number of objectives our team controls
+    int getNumberOfObjectivesWeHave() {
+        int count = 0;
+        if (leftObjective.getControllingTeam () == ourTeamColor) {
+            count++;
+        }
+        if (middleObjective.getControllingTeam () == ourTeamColor) {
+            count++;
+        }
+        if (rightObjective.getControllingTeam () == ourTeamColor) {
+            count++;
+        }
+        return count;
+    }
+
+    // returns the number of objectives the other team controls
+    int getNumberOfObjectivesTheyHave() {
+        int count = 0;
+        team otherTeamColor = (ourTeamColor == team.blue) ? team.red : team.blue;
+        if (leftObjective.getControllingTeam () == otherTeamColor) {
+            count++;
+        }
+        if (middleObjective.getControllingTeam () == otherTeamColor) {
+            count++;
+        }
+        if (rightObjective.getControllingTeam () == otherTeamColor) {
+            count++;
+        }
+        return count;
+    }
+
 
     // Faces a character in a direction relative to their current facing. Use 179 to spin fast.
     void faceRelative(CharacterScript character, Transform characterTransform, float angle)
