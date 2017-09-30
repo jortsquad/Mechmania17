@@ -57,6 +57,11 @@ public class TEAM_JORTS_SQUAD : MonoBehaviour
     private Action moveToMiddle;
     private Action moveToRight;
 
+    private Vector3 redTeamBase = new Vector3(-57, 0 , 35);
+    private Vector3 blueTeamBase = new Vector3(57, 0, -35);
+
+    private Vector3 otherTeamBase; 
+
     void Start()
     {
 
