@@ -59,8 +59,8 @@ public class TEAM_JORTS_SQUAD : MonoBehaviour
     private Action moveToMiddle;
     private Action moveToRight;
 
-    private Vector3 redTeamBase = new Vector3(-57, 0 , 35);
-    private Vector3 blueTeamBase = new Vector3(57, 0, -35);
+    private Vector3 redTeamBase = new Vector3(-47, 0 , 23);
+    private Vector3 blueTeamBase = new Vector3(47, 0, -23);
 
     private Vector3 otherTeamBase; 
 
@@ -98,13 +98,14 @@ public class TEAM_JORTS_SQUAD : MonoBehaviour
         charActions[character2.name] = character2Actions = new LinkedList<Action>();
         charActions[character3.name] = character3Actions = new LinkedList<Action>();
 
-		if (Vector3.Distance (character1Transform.position, leftObjective.transform.position) < Vector3.Distance (character1Transform.position, rightObjective.transform.position)) {
+		if (ourTeamColor == team.red) {
 			addAction (character1, moveToLeft);
 			addAction (character2, moveToLeft);
 			addAction (character3, moveToLeft);
             addAction(character1, new CapturePointAction(leftObjective));
             addAction(character2, new CapturePointAction(leftObjective));
             addAction(character3, new CapturePointAction(leftObjective));
+            otherTeamBase = blueTeamBase;
         } else {
 			addAction (character1, moveToRight);
 			addAction (character2, moveToRight);
@@ -112,6 +113,7 @@ public class TEAM_JORTS_SQUAD : MonoBehaviour
             addAction(character1, new CapturePointAction(rightObjective));
             addAction(character2, new CapturePointAction(rightObjective));
             addAction(character3, new CapturePointAction(rightObjective));
+            otherTeamBase = redTeamBase;
         }
         
 
@@ -121,6 +123,9 @@ public class TEAM_JORTS_SQUAD : MonoBehaviour
         addAction(character1, new CapturePointAction(middleObjective));
         addAction(character2, new CapturePointAction(middleObjective));
         addAction(character3, new CapturePointAction(middleObjective));
+        addAction(character1, moveToLeft);
+        addAction(character2, moveToLeft);
+        addAction(character3, moveToLeft);
 
         setLoadout(character1, loadout.SHORT);
         setLoadout(character2, loadout.SHORT);
@@ -134,9 +139,36 @@ public class TEAM_JORTS_SQUAD : MonoBehaviour
     // Update() is called every frame
     void Update()
     {
-        Debug.Log (getNumberOfObjectivesTheyHave () + " " + getNumberOfObjectivesWeHave ());
         determineHealthChange();
         isBeingShot();
+
+        if (character1BeingShot)
+        {
+            fuckUpAttacker(character1);
+        }
+        else
+        {
+            spinOrLookAtEnemy(character1, character1Transform, 170f);
+        }
+
+
+        if (character2BeingShot)
+        {
+            fuckUpAttacker(character2);
+        }
+        else
+        {
+            spinOrLookAtEnemy(character2, character2Transform, -170f);
+        }
+
+        if (character3BeingShot)
+        {
+            fuckUpAttacker(character3);
+        }
+        else
+        {
+            spinOrLookAtEnemy(character3, character3Transform, 170f);
+        }
 
         if (character1.getHP() > 0)
         {
@@ -164,46 +196,36 @@ public class TEAM_JORTS_SQUAD : MonoBehaviour
         {
             onSpawn(character3);
         }
-
-
-        if (character1BeingShot)
-        {
-            fuckUpAttacker(character1);
-        }
-        else
-        {
-            spinOrLookAtEnemy(character1, character1Transform, 170f);
-        }
-
-
-        if (character2BeingShot)
-        {
-            fuckUpAttacker(character2);
-        }
-        else
-        {
-            spinOrLookAtEnemy(character2, character2Transform, 170f);
-        }
-
-        if (character3BeingShot)
-        {
-            fuckUpAttacker(character3);
-        }
-        else
-        {
-            spinOrLookAtEnemy(character3, character3Transform, 170f);
-        }
-
     }
 
     void onSpawn(CharacterScript character)
     {
-        addAction(character, moveToMiddle);
+        if(getNumberOfObjectivesWeHave() != 3)
+        {
+            team otherTeamColor = (ourTeamColor == team.blue) ? team.red : team.blue;
+            if (leftObjective.getControllingTeam() == otherTeamColor)
+            {
+                addAction(character, moveToLeft);
+            }
+            else if (middleObjective.getControllingTeam() == otherTeamColor)
+            {
+                addAction(character, moveToMiddle);
+            }
+            if (rightObjective.getControllingTeam() == otherTeamColor)
+            {
+                addAction(character, moveToRight);
+            }
+        }
+        addAction(character, new MoveAction(otherTeamBase));
     }
 
     // Performs the first action in the action queue, dequeuing actions that are completed
     void handleActions(CharacterScript character, LinkedList<Action> actions)
     {
+        if(character1 == character && actions.Count > 0)
+        {
+            Debug.Log(actions.First.Value.GetType() + " " + actions.Count);
+        }
         pruneList(actions, character);
         if (actions.Count > 0)
         {
@@ -340,9 +362,9 @@ public class TEAM_JORTS_SQUAD : MonoBehaviour
     void fuckUpAttacker(CharacterScript character)
     {
         Vector3 hitLoc = character.attackedFromLocations[character.attackedFromLocations.Count - 1];
-        character.SetFacing(hitLoc);
+        //character.SetFacing(hitLoc);
         LinkedList<Action> actions = charActions[character.name];
-        if (actions.Count == 0 || !(actions.First.Value is MoveToCoverAction))
+        if (actions.Count == 0 || (!(actions.First.Value is MoveToCoverAction) && !(actions.First.Value is MoveToAssistAction)))
         {
             addPriorityAction(character, new MoveToCoverAction(hitLoc));
 
@@ -591,7 +613,7 @@ public class TEAM_JORTS_SQUAD : MonoBehaviour
         // Whether or not the action can be considered completed
         public override bool isComplete(CharacterScript character)
         {
-            return character.isDoneMoving(.5f);
+            return character.isDoneMoving(2f);
         }
 
         public Vector3 getLocation()
