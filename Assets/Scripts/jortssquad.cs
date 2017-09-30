@@ -3,13 +3,13 @@ using System.Collections.Generic;
 using UnityEngine;
 
 //---------- CHANGE THIS NAME HERE -------
-public class TEAM_JORTS_SQUAD : MonoBehaviour
+public class jortssquad : MonoBehaviour
 {
     //---------- CHANGE THIS NAME HERE -------
-    public static TEAM_JORTS_SQUAD AddYourselfTo(GameObject host)
+    public static jortssquad AddYourselfTo(GameObject host)
     {
         //---------- CHANGE THIS NAME HERE -------
-        return host.AddComponent<TEAM_JORTS_SQUAD>();
+        return host.AddComponent<jortssquad>();
     }
 
     /*vvvv DO NOT MODIFY vvvvv*/
@@ -98,34 +98,60 @@ public class TEAM_JORTS_SQUAD : MonoBehaviour
         charActions[character2.name] = character2Actions = new LinkedList<Action>();
         charActions[character3.name] = character3Actions = new LinkedList<Action>();
 
-		if (ourTeamColor == team.red) {
-			addAction (character1, moveToLeft);
-			addAction (character2, moveToLeft);
-			addAction (character3, moveToLeft);
+        if (ourTeamColor == team.red) {
+            addAction (character1, moveToLeft);
+            addAction (character2, moveToLeft);
+            addAction (character3, moveToLeft);
             addAction(character1, new CapturePointAction(leftObjective));
             addAction(character2, new CapturePointAction(leftObjective));
             addAction(character3, new CapturePointAction(leftObjective));
-            otherTeamBase = blueTeamBase;
-        } else {
-			addAction (character1, moveToRight);
-			addAction (character2, moveToRight);
-			addAction (character3, moveToRight);
+            addAction(character1, moveToMiddle);
+            addAction(character2, moveToMiddle);
+            addAction(character3, moveToMiddle);
+            addAction(character1, new CapturePointAction(middleObjective));
+            addAction(character2, new CapturePointAction(middleObjective));
+            addAction(character3, new CapturePointAction(middleObjective));
+            addAction(character1, moveToRight);
+            addAction(character2, moveToRight);
+            addAction(character3, moveToRight);
             addAction(character1, new CapturePointAction(rightObjective));
             addAction(character2, new CapturePointAction(rightObjective));
             addAction(character3, new CapturePointAction(rightObjective));
+            addAction(character1, moveToMiddle);
+            addAction(character2, moveToMiddle);
+            addAction(character3, moveToMiddle);
+            addAction(character1, new WaitUntilLosingAction());
+            addAction(character2, new WaitUntilLosingAction());
+            addAction(character3, new WaitUntilLosingAction());
+
+            otherTeamBase = blueTeamBase;
+        } else {
+            addAction (character1, moveToRight);
+            addAction (character2, moveToRight);
+            addAction (character3, moveToRight);
+            addAction(character1, new CapturePointAction(rightObjective));
+            addAction(character2, new CapturePointAction(rightObjective));
+            addAction(character3, new CapturePointAction(rightObjective));
+            addAction(character1, moveToMiddle);
+            addAction(character2, moveToMiddle);
+            addAction(character3, moveToMiddle);
+            addAction(character1, new CapturePointAction(middleObjective));
+            addAction(character2, new CapturePointAction(middleObjective));
+            addAction(character3, new CapturePointAction(middleObjective));
+            addAction(character1, moveToLeft);
+            addAction(character2, moveToLeft);
+            addAction(character3, moveToLeft);
+            addAction(character1, new CapturePointAction(leftObjective));
+            addAction(character2, new CapturePointAction(leftObjective));
+            addAction(character3, new CapturePointAction(leftObjective));
+            addAction(character1, moveToMiddle);
+            addAction(character2, moveToMiddle);
+            addAction(character3, moveToMiddle);
+            addAction(character1, new WaitUntilLosingAction());
+            addAction(character2, new WaitUntilLosingAction());
+            addAction(character3, new WaitUntilLosingAction());
             otherTeamBase = redTeamBase;
         }
-        
-
-        addAction(character1, moveToMiddle);
-        addAction(character2, moveToMiddle);
-        addAction(character3, moveToMiddle);
-        addAction(character1, new CapturePointAction(middleObjective));
-        addAction(character2, new CapturePointAction(middleObjective));
-        addAction(character3, new CapturePointAction(middleObjective));
-        addAction(character1, moveToLeft);
-        addAction(character2, moveToLeft);
-        addAction(character3, moveToLeft);
 
         setLoadout(character1, loadout.SHORT);
         setLoadout(character2, loadout.SHORT);
@@ -200,7 +226,7 @@ public class TEAM_JORTS_SQUAD : MonoBehaviour
 
     void onSpawn(CharacterScript character)
     {
-        if(getNumberOfObjectivesWeHave() != 3)
+        /*if(getNumberOfObjectivesWeHave() != 3)
         {
             team otherTeamColor = (ourTeamColor == team.blue) ? team.red : team.blue;
             if (leftObjective.getControllingTeam() == otherTeamColor)
@@ -216,12 +242,48 @@ public class TEAM_JORTS_SQUAD : MonoBehaviour
                 addAction(character, moveToRight);
             }
         }
-        addAction(character, new MoveAction(otherTeamBase));
+        addAction(character, new MoveAction(otherTeamBase));*/
     }
 
     // Performs the first action in the action queue, dequeuing actions that are completed
     void handleActions(CharacterScript character, LinkedList<Action> actions)
     {
+
+        if (actions.Count == 0)
+        {
+            ObjectiveScript bestObj = null;
+            float minDist = float.MaxValue;
+            if(rightObjective.getControllingTeam() != ourTeamColor)
+            {
+                float dist = Vector3.Distance(transforms[character.name].position, rightObjective.getObjectiveLocation());
+                if(dist < minDist)
+                {
+                    minDist = dist;
+                    bestObj = rightObjective;
+                }
+            }
+            if (middleObjective.getControllingTeam() != ourTeamColor)
+            {
+                float dist = Vector3.Distance(transforms[character.name].position, middleObjective.getObjectiveLocation());
+                if (dist < minDist)
+                {
+                    minDist = dist;
+                    bestObj = middleObjective;
+                }
+            }
+            if (leftObjective.getControllingTeam() != ourTeamColor)
+            {
+                float dist = Vector3.Distance(transforms[character.name].position, leftObjective.getObjectiveLocation());
+                if (dist < minDist)
+                {
+                    minDist = dist;
+                    bestObj = leftObjective;
+                }
+            }
+            addAction(character, new MoveAction(bestObj.getObjectiveLocation()));
+            addAction(character, new CapturePointAction(bestObj));
+            addAction(character, new WaitUntilLosingAction());
+        }
         pruneList(actions, character);
         if (actions.Count > 0)
         {
@@ -244,10 +306,10 @@ public class TEAM_JORTS_SQUAD : MonoBehaviour
             }
         }
     }
-	// RETURN SAME ACTIONS IF NO ITEM PRESENT
-	LinkedList<Action> getObjectDetourActions(CharacterScript character) {
+    // RETURN SAME ACTIONS IF NO ITEM PRESENT
+    LinkedList<Action> getObjectDetourActions(CharacterScript character) {
 
-		LinkedList<Action> detourActions = new LinkedList<Action> ();
+        LinkedList<Action> detourActions = new LinkedList<Action> ();
 
         LinkedList<Action> currentActions = charActions[character.name];
 
@@ -265,12 +327,12 @@ public class TEAM_JORTS_SQUAD : MonoBehaviour
         }
 
         if (targetItem.transform.position != new Vector3 (0, 0, 0)) {
-			MoveAction detourMoveAction = new MoveToItemAction (character.FindClosestItem ());
-			detourActions.AddFirst (detourMoveAction);
-		}
+            MoveAction detourMoveAction = new MoveToItemAction (character.FindClosestItem ());
+            detourActions.AddFirst (detourMoveAction);
+        }
 
-		return detourActions;
-	}
+        return detourActions;
+    }
 
 
 
@@ -282,13 +344,13 @@ public class TEAM_JORTS_SQUAD : MonoBehaviour
 
     void addAction(CharacterScript character, Action action) {
         charActions[character.name].AddLast(action);
-	}
+    }
 
-	/*
-	 * Puts the current action at the head of the LinkedList and then sets current action to the passed action.
-	 * As a result, the character will go back to its previous action after finishing the current one.
-	 * */
-	void addPriorityAction(CharacterScript character, Action action) {
+    /*
+     * Puts the current action at the head of the LinkedList and then sets current action to the passed action.
+     * As a result, the character will go back to its previous action after finishing the current one.
+     * */
+    void addPriorityAction(CharacterScript character, Action action) {
         bool waitType = (action is WaitAction);
 
         LinkedList<Action> actions = charActions[character.name];
@@ -297,7 +359,7 @@ public class TEAM_JORTS_SQUAD : MonoBehaviour
         {
             actions.AddFirst(new MoveAction(character1Transform.position));
         }
-	}
+    }
 
     void determineHealthChange()
     {
@@ -346,7 +408,7 @@ public class TEAM_JORTS_SQUAD : MonoBehaviour
         {
             character3BeingShot = false;
         }
-    
+
     }
 
     // Whether or not this character was shot in this frame
@@ -590,21 +652,21 @@ public class TEAM_JORTS_SQUAD : MonoBehaviour
     class MoveAction : Action
     {
         private Vector3 location;
-		private bool isItemDest;
+        private bool isItemDest;
 
         public MoveAction(Vector3 _location)
         {
             location = _location;
-			isItemDest = false;
+            isItemDest = false;
         }
 
-		public MoveAction(Vector3 _location, bool isItem) {
+        public MoveAction(Vector3 _location, bool isItem) {
 
-			location = _location;
-			if(isItem) {
-				isItemDest = true;
-			}
-		}
+            location = _location;
+            if(isItem) {
+                isItemDest = true;
+            }
+        }
 
         // Whether or not the action can be considered completed
         public override bool isComplete(CharacterScript character)
@@ -617,9 +679,9 @@ public class TEAM_JORTS_SQUAD : MonoBehaviour
             return location;
         }
 
-		public bool isItem() {
-			return isItemDest;
-		}
+        public bool isItem() {
+            return isItemDest;
+        }
 
         // How many seconds left needed to finish this action, if active, or total time if not active
         public override float timeToComplete(CharacterScript character, bool isCurrentAction, Vector3 previousPos)

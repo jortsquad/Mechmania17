@@ -5,7 +5,7 @@ using System.Text;
 using UnityEngine;
 using System.Collections.Generic;
 
-namespace CSharpCompiler 
+namespace CSharpCompiler
 {
 
     public class BlueLoader : MonoBehaviour {
@@ -21,7 +21,7 @@ namespace CSharpCompiler
             }
             else
             {
-                path = Application.dataPath + "/Scripts/TestAI.cs";
+                path = Application.dataPath + "/Scripts/jortssquad.cs";
             }
         }
 
@@ -55,7 +55,7 @@ namespace CSharpCompiler
                     Debug.Log(e);
                 }
             }
-            
+
             //foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies()) {
                 //param.ReferencedAssemblies.Add(assembly.Location);
             //}
