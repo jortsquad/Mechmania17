@@ -22,7 +22,7 @@ namespace CSharpCompiler
             }
             else
             {
-                path = Application.streamingAssetsPath + "/" + classname + ".cs";
+                path = Application.dataPath + "/Scripts/" + classname + ".cs";
             }
         }
 

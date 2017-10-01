@@ -15,9 +15,7 @@ public class jortssquad : MonoBehaviour
     public CharacterScript character2;
     [SerializeField]
     public CharacterScript character3;
-    private Transform character1Transform;
-    private Transform character2Transform;
-    private Transform character3Transform;
+    private Transform character1Transform, character2Transform, character3Transform;
     private Dictionary<string, loadout> loadouts = new Dictionary<string, loadout>();
     private Dictionary<string, int> lastHealth = new Dictionary<string, int>();
     private Dictionary<string, int> deltaHealth = new Dictionary<string, int>();
@@ -35,16 +33,10 @@ public class jortssquad : MonoBehaviour
     private LinkedList<Action> character1Actions;
     private LinkedList<Action> character2Actions;
     private LinkedList<Action> character3Actions;
-    private int lastHealth1;
-    private int lastHealth2;
-    private int lastHealth3;
-    static private ObjectiveScript middleObjective;
-    static private ObjectiveScript leftObjective;
-    static private ObjectiveScript rightObjective;
+    private int lastHealth1, lastHealth2, lastHealth3;
+    static private ObjectiveScript middleObjective, leftObjective, rightObjective;
     static private team ourTeamColor;
-    private Action moveToLeft;
-    private Action moveToMiddle;
-    private Action moveToRight;
+    private Action moveToLeft, moveToMiddle, moveToRight;
     private Vector3 redTeamBase = new Vector3(-47, 0 , 23);
     private Vector3 blueTeamBase = new Vector3(47, 0, -23);
     private Vector3 otherTeamBase; 
@@ -82,33 +74,14 @@ public class jortssquad : MonoBehaviour
         charActions[character2.name] = character2Actions = new LinkedList<Action>();
         charActions[character3.name] = character3Actions = new LinkedList<Action>();
 
+
         if (ourTeamColor == team.red) {
             addAction (character1, moveToLeft);
             addAction (character2, moveToLeft);
             addAction (character3, moveToLeft);
-            addAction(character1, new CapturePointAction(leftObjective));
-            addAction(character2, new CapturePointAction(leftObjective));
-            addAction(character3, new CapturePointAction(leftObjective));
-            addAction(character1, moveToMiddle);
-            addAction(character2, moveToMiddle);
-            addAction(character3, moveToMiddle);
-            addAction(character1, new CapturePointAction(middleObjective));
-            addAction(character2, new CapturePointAction(middleObjective));
-            addAction(character3, new CapturePointAction(middleObjective));
-            addAction(character1, moveToRight);
-            addAction(character2, moveToRight);
-            addAction(character3, moveToRight);
-            addAction(character1, new CapturePointAction(rightObjective));
-            addAction(character2, new CapturePointAction(rightObjective));
-            addAction(character3, new CapturePointAction(rightObjective));
-            addAction(character1, moveToMiddle);
-            addAction(character2, moveToMiddle);
-            addAction(character3, moveToMiddle);
-            addAction(character1, new WaitUntilLosingAction());
-            addAction(character2, new WaitUntilLosingAction());
-            addAction(character3, new WaitUntilLosingAction());
-
-            otherTeamBase = blueTeamBase;
+            addAction (character1, new CapturePointAction (leftObjective));
+            addAction (character2, new CapturePointAction (leftObjective));
+            addAction (character3, new CapturePointAction (leftObjective));
         } else {
             addAction (character1, moveToRight);
             addAction (character2, moveToRight);
@@ -116,37 +89,47 @@ public class jortssquad : MonoBehaviour
             addAction(character1, new CapturePointAction(rightObjective));
             addAction(character2, new CapturePointAction(rightObjective));
             addAction(character3, new CapturePointAction(rightObjective));
-            addAction(character1, moveToMiddle);
-            addAction(character2, moveToMiddle);
-            addAction(character3, moveToMiddle);
-            addAction(character1, new CapturePointAction(middleObjective));
-            addAction(character2, new CapturePointAction(middleObjective));
-            addAction(character3, new CapturePointAction(middleObjective));
+        }
+
+        addAction(character1, moveToMiddle);
+        addAction(character2, moveToMiddle);
+        addAction(character3, moveToMiddle);
+        addAction(character1, new CapturePointAction(middleObjective));
+        addAction(character2, new CapturePointAction(middleObjective));
+        addAction(character3, new CapturePointAction(middleObjective));
+
+        if (ourTeamColor == team.red)
+        {
+            addAction(character1, moveToRight);
+            addAction(character2, moveToRight);
+            addAction(character3, moveToRight);
+            addAction(character1, new CapturePointAction(rightObjective));
+            addAction(character2, new CapturePointAction(rightObjective));
+            addAction(character3, new CapturePointAction(rightObjective));
+
+            otherTeamBase = blueTeamBase;
+        } else {
             addAction(character1, moveToLeft);
             addAction(character2, moveToLeft);
             addAction(character3, moveToLeft);
             addAction(character1, new CapturePointAction(leftObjective));
             addAction(character2, new CapturePointAction(leftObjective));
             addAction(character3, new CapturePointAction(leftObjective));
-            addAction(character1, moveToMiddle);
-            addAction(character2, moveToMiddle);
-            addAction(character3, moveToMiddle);
-            addAction(character1, new WaitUntilLosingAction());
-            addAction(character2, new WaitUntilLosingAction());
-            addAction(character3, new WaitUntilLosingAction());
             otherTeamBase = redTeamBase;
         }
+
+        addAction(character1, moveToMiddle);
+        addAction(character2, moveToMiddle);
+        addAction(character3, moveToMiddle);
+        addAction(character1, new WaitUntilLosingAction());
+        addAction(character2, new WaitUntilLosingAction());
+        addAction(character3, new WaitUntilLosingAction());
 
         setLoadout(character1, loadout.SHORT);
         setLoadout(character2, loadout.SHORT);
         setLoadout(character3, loadout.SHORT);
     }
-
-    /*^^^^ DO NOT MODIFY ^^^^*/
-
-    /* Your code below this line */
-
-    // Update() is called every frame
+        
     void Update()
     {
         determineHealthChange();
@@ -215,6 +198,16 @@ public class jortssquad : MonoBehaviour
 
     void handleActions(CharacterScript character, LinkedList<Action> actions)
     {
+        GameObject nearestItem = character.FindClosestItem();
+        float itemlen = (nearestItem.transform.position - transforms [character.name].position).magnitude;
+        if (nearestItem.transform.position != Vector3.zero
+            && ((itemlen < 15)
+                || (actions.Count > 0 && actions.First.Value is WaitUntilLosingAction && itemlen < 30 )))
+        {
+            if (actions.Count == 0 || !(actions.First.Value is MoveToItemAction)) {
+                addPriorityAction (character, new MoveToItemAction (nearestItem));
+            }
+        }
 
         if (actions.Count == 0)
         {
@@ -353,7 +346,8 @@ public class jortssquad : MonoBehaviour
         Vector3 hitLoc = character.attackedFromLocations[character.attackedFromLocations.Count - 1];
         character.SetFacing(hitLoc);
         LinkedList<Action> actions = charActions[character.name];
-        if (actions.Count == 0 || (!(actions.First.Value is MoveToCoverAction) && !(actions.First.Value is MoveToAssistAction)))
+        if (actions.Count == 0 || 
+            (!(actions.First.Value is MoveToCoverAction) && !(actions.First.Value is MoveToAssistAction) && !(actions.First.Value is MoveToItemAction)))
         {
             addPriorityAction(character, new MoveToCoverAction(hitLoc));
 
