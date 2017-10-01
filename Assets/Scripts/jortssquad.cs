@@ -2,34 +2,27 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-//---------- CHANGE THIS NAME HERE -------
 public class jortssquad : MonoBehaviour
 {
-    //---------- CHANGE THIS NAME HERE -------
     public static jortssquad AddYourselfTo(GameObject host)
     {
-        //---------- CHANGE THIS NAME HERE -------
         return host.AddComponent<jortssquad>();
     }
-
-    /*vvvv DO NOT MODIFY vvvvv*/
+        
     [SerializeField]
     public CharacterScript character1;
     [SerializeField]
     public CharacterScript character2;
     [SerializeField]
     public CharacterScript character3;
-
     private Transform character1Transform;
     private Transform character2Transform;
     private Transform character3Transform;
-
     private Dictionary<string, loadout> loadouts = new Dictionary<string, loadout>();
     private Dictionary<string, int> lastHealth = new Dictionary<string, int>();
     private Dictionary<string, int> deltaHealth = new Dictionary<string, int>();
     private static Dictionary<string, Transform> transforms = new Dictionary<string, Transform>();
     private Dictionary<string, LinkedList<Action>> charActions = new Dictionary<string, LinkedList<Action>>();
-
     private bool character1BeingShot = false;
     private bool character2BeingShot = false;
     private bool character3BeingShot = false;
@@ -37,31 +30,23 @@ public class jortssquad : MonoBehaviour
     private float character2LastShot = -5;
     private float character3LastShot = -5;
     private float time = 0;
-
     private const int MOVE_ACTION = 0;
     private const int WAIT_ACTION = 1;
-
     private LinkedList<Action> character1Actions;
     private LinkedList<Action> character2Actions;
     private LinkedList<Action> character3Actions;
-
     private int lastHealth1;
     private int lastHealth2;
     private int lastHealth3;
-
     static private ObjectiveScript middleObjective;
     static private ObjectiveScript leftObjective;
     static private ObjectiveScript rightObjective;
-
     static private team ourTeamColor;
-
     private Action moveToLeft;
     private Action moveToMiddle;
     private Action moveToRight;
-
     private Vector3 redTeamBase = new Vector3(-47, 0 , 23);
     private Vector3 blueTeamBase = new Vector3(47, 0, -23);
-
     private Vector3 otherTeamBase; 
 
     void Start()
@@ -78,7 +63,6 @@ public class jortssquad : MonoBehaviour
         transforms[character1.name] = character1Transform;
         transforms[character2.name] = character2Transform;
         transforms[character3.name] = character3Transform;
-
 
         leftObjective = GameObject.Find("LeftObjective").GetComponent<ObjectiveScript>();
         middleObjective = GameObject.Find("MiddleObjective").GetComponent<ObjectiveScript>();
@@ -226,26 +210,9 @@ public class jortssquad : MonoBehaviour
 
     void onSpawn(CharacterScript character)
     {
-        /*if(getNumberOfObjectivesWeHave() != 3)
-        {
-            team otherTeamColor = (ourTeamColor == team.blue) ? team.red : team.blue;
-            if (leftObjective.getControllingTeam() == otherTeamColor)
-            {
-                addAction(character, moveToLeft);
-            }
-            else if (middleObjective.getControllingTeam() == otherTeamColor)
-            {
-                addAction(character, moveToMiddle);
-            }
-            if (rightObjective.getControllingTeam() == otherTeamColor)
-            {
-                addAction(character, moveToRight);
-            }
-        }
-        addAction(character, new MoveAction(otherTeamBase));*/
+        
     }
 
-    // Performs the first action in the action queue, dequeuing actions that are completed
     void handleActions(CharacterScript character, LinkedList<Action> actions)
     {
 
@@ -306,37 +273,7 @@ public class jortssquad : MonoBehaviour
             }
         }
     }
-    // RETURN SAME ACTIONS IF NO ITEM PRESENT
-    LinkedList<Action> getObjectDetourActions(CharacterScript character) {
-
-        LinkedList<Action> detourActions = new LinkedList<Action> ();
-
-        LinkedList<Action> currentActions = charActions[character.name];
-
-        GameObject targetItem = character.FindClosestItem();
-
-        if (currentActions.First.Value is MoveToItemAction) {
-            GameObject charPursuingItem = ((MoveToItemAction)currentActions.First.Value).getItem();
-            if (charPursuingItem == targetItem)
-            {
-                return currentActions;
-            }
-        }
-        foreach (Action action in currentActions) {
-            detourActions.AddLast (action);
-        }
-
-        if (targetItem.transform.position != new Vector3 (0, 0, 0)) {
-            MoveAction detourMoveAction = new MoveToItemAction (character.FindClosestItem ());
-            detourActions.AddFirst (detourMoveAction);
-        }
-
-        return detourActions;
-    }
-
-
-
-    // Whether or not the current action in this action list is completed
+        
     bool isActionDone(LinkedList<Action> actions, CharacterScript character)
     {
         return actions.First.Value.isComplete(character);
@@ -345,11 +282,7 @@ public class jortssquad : MonoBehaviour
     void addAction(CharacterScript character, Action action) {
         charActions[character.name].AddLast(action);
     }
-
-    /*
-     * Puts the current action at the head of the LinkedList and then sets current action to the passed action.
-     * As a result, the character will go back to its previous action after finishing the current one.
-     * */
+        
     void addPriorityAction(CharacterScript character, Action action) {
         bool waitType = (action is WaitAction);
 
@@ -376,8 +309,7 @@ public class jortssquad : MonoBehaviour
         lastHealth[character2.name] = character2.getHP();
         lastHealth[character3.name] = character3.getHP();
     }
-
-    // determine if characters are being shot
+        
     void isBeingShot() {
         if (deltaHealth [character1.name] < 0)
         {
@@ -410,8 +342,7 @@ public class jortssquad : MonoBehaviour
         }
 
     }
-
-    // Whether or not this character was shot in this frame
+        
     bool wasShot(CharacterScript character)
     {
         return deltaHealth[character.name] < 0;
@@ -420,7 +351,7 @@ public class jortssquad : MonoBehaviour
     void fuckUpAttacker(CharacterScript character)
     {
         Vector3 hitLoc = character.attackedFromLocations[character.attackedFromLocations.Count - 1];
-        //character.SetFacing(hitLoc);
+        character.SetFacing(hitLoc);
         LinkedList<Action> actions = charActions[character.name];
         if (actions.Count == 0 || (!(actions.First.Value is MoveToCoverAction) && !(actions.First.Value is MoveToAssistAction)))
         {
@@ -443,21 +374,7 @@ public class jortssquad : MonoBehaviour
         }
 
     }
-
-    // Has a character face its attacker and retreat into cover
-    /*void shootAndCover(CharacterScript character)
-    {
-        character.SetFacing (character.attackedFromLocations [character.attackedFromLocations.Count - 1]);
-        LinkedList<Action> actions = charActions[character.name];
-        if (actions.Count == 0 || !(actions.First.Value is MoveToCoverAction))
-        {
-            flank(character, actions, character.attackedFromLocations[character.attackedFromLocations.Count - 1]);
-            addPriorityAction(character, new MoveToCoverAction(character.FindClosestCover(character.attackedFromLocations[character.attackedFromLocations.Count - 1])));
-        }
-    }*/
-
-    // Determines which loadout type a character was shot by during this frame, if they were shot
-    // Returns null if none
+   
     loadout? loadoutShotBy(CharacterScript character)
     {
         int loss = -deltaHealth[character.name];
@@ -475,8 +392,7 @@ public class jortssquad : MonoBehaviour
         }
         return null;
     }
-
-    // Has a character spin in a circle until it sees an enemy, in which case it looks at them
+        
     void spinOrLookAtEnemy(CharacterScript character, Transform characterTransform, float angle)
     {
         if (character.visibleEnemyLocations.Count > 0)
@@ -488,8 +404,7 @@ public class jortssquad : MonoBehaviour
             faceRelative(character, characterTransform, angle);
         }
     }
-
-    // returns the number of objectives our team controls
+        
     static int getNumberOfObjectivesWeHave() {
         int count = 0;
         if (leftObjective.getControllingTeam () == ourTeamColor) {
@@ -503,8 +418,7 @@ public class jortssquad : MonoBehaviour
         }
         return count;
     }
-
-    // returns the number of objectives the other team controls
+        
     static int getNumberOfObjectivesTheyHave() {
         int count = 0;
         team otherTeamColor = (ourTeamColor == team.blue) ? team.red : team.blue;
@@ -519,25 +433,20 @@ public class jortssquad : MonoBehaviour
         }
         return count;
     }
-
-
-    // Faces a character in a direction relative to their current facing. Use 179 to spin fast.
+        
     void faceRelative(CharacterScript character, Transform characterTransform, float angle)
     {
         character.SetFacing(characterTransform.position + Quaternion.AngleAxis(angle, Vector3.up) * characterTransform.forward);
     }
-
-    // Use to set a character's loadout - allows us to internally track loadout assignments
+        
     void setLoadout(CharacterScript character, loadout loadout)
     {
         character.setLoadout(loadout);
         loadouts[character.name] = loadout;
     }
-
-    // Gets a character's damage based on their loadout. Does not take into account damage powerups
+        
     int getDamage(CharacterScript character)
     {
-        // Assume the default is the medium loadout
         if (!loadouts.ContainsKey(character.name))
         {
             return 25;
@@ -557,11 +466,9 @@ public class jortssquad : MonoBehaviour
             return 35;
         }
     }
-
-    // Returns the range of our character
+        
     int getRange(CharacterScript character)
     {
-        // Assume the default is the medium loadout
         if (!loadouts.ContainsKey(character.name))
         {
             return 25;
@@ -605,8 +512,7 @@ public class jortssquad : MonoBehaviour
             actions.AddFirst(new MoveAction(transforms[character.name].position));
         }
     }
-
-    // Returns the best (as of now, most time efficient) action list
+        
     LinkedList<Action> compareActionLists(LinkedList<Action> option1, LinkedList<Action> option2, CharacterScript character)
     {
         float time1 = getActionsTime(option1, character);
@@ -614,8 +520,7 @@ public class jortssquad : MonoBehaviour
 
         return time1 < time2 ? option1 : option2;
     }
-
-    // Gets the total number of seconds needed to complete the given set of actions
+    
     float getActionsTime(LinkedList<Action> actions, CharacterScript character)
     {
         float totalTime = 0;
@@ -638,15 +543,9 @@ public class jortssquad : MonoBehaviour
 
     abstract class Action
     {
-        // Whether or not the action can be considered completed
         abstract public bool isComplete(CharacterScript character);
-
-        // How many seconds left needed to finish this action, if active, or total time if not active
         abstract public float timeToComplete(CharacterScript character, bool isCurrentAction, Vector3 previousPos);
-
-        // Whether or not this action is useless and should be pruned from the action list
         abstract public bool shouldPrune(CharacterScript character);
-
     }
 
     class MoveAction : Action
@@ -667,8 +566,7 @@ public class jortssquad : MonoBehaviour
                 isItemDest = true;
             }
         }
-
-        // Whether or not the action can be considered completed
+            
         public override bool isComplete(CharacterScript character)
         {
             return character.isDoneMoving(2f);
@@ -682,8 +580,7 @@ public class jortssquad : MonoBehaviour
         public bool isItem() {
             return isItemDest;
         }
-
-        // How many seconds left needed to finish this action, if active, or total time if not active
+        
         public override float timeToComplete(CharacterScript character, bool isCurrentAction, Vector3 previousPos)
         {
             float distance = (location - previousPos).magnitude;
@@ -692,11 +589,9 @@ public class jortssquad : MonoBehaviour
 
         int getCharSpeed(CharacterScript character)
         {
-            // TODO: Account for speed powerup
             return 10;
         }
-
-        // Whether or not this action is useless and should be pruned from the action list
+            
         public override bool shouldPrune(CharacterScript character)
         {
             return false;
@@ -731,8 +626,7 @@ public class jortssquad : MonoBehaviour
         {
             item = _item;
         }
-
-        // Whether or not this action is useless and should be pruned from the action list
+            
         public override bool shouldPrune(CharacterScript character)
         {
             return item == null;
@@ -759,9 +653,7 @@ public class jortssquad : MonoBehaviour
         {
             return waitTime;
         }
-
-        // Start wait time is the game time at which this wait action began
-        // -1 until this wait action actually starts executing
+            
         public float getStartWaitTime()
         {
             return startWaitTime;
@@ -771,14 +663,12 @@ public class jortssquad : MonoBehaviour
         {
             startWaitTime = _startWaitTime;
         }
-
-        // Whether or not the action can be considered completed
+            
         public override bool isComplete(CharacterScript character)
         {
             return Time.time - startWaitTime >= waitTime;
         }
-
-        // How many seconds left needed to finish this action, if active, or total time if not active
+            
         public override float timeToComplete(CharacterScript character, bool isCurrentAction, Vector3 previousPos)
         {
             if (isCurrentAction)
@@ -787,8 +677,7 @@ public class jortssquad : MonoBehaviour
             }
             return waitTime;
         }
-
-        // Whether or not this action is useless and should be pruned from the action list
+            
         public override bool shouldPrune(CharacterScript character)
         {
             return false;
@@ -803,8 +692,7 @@ public class jortssquad : MonoBehaviour
         {
             objective = _objective;
         }
-
-        // Whether or not this action is useless and should be pruned from the action list
+            
         public override bool shouldPrune(CharacterScript character)
         {
             return objective.getControllingTeam() == character.getTeam();
