@@ -201,8 +201,8 @@ public class jortssquad : MonoBehaviour
         GameObject nearestItem = character.FindClosestItem();
         float itemlen = (nearestItem.transform.position - transforms [character.name].position).magnitude;
         if (nearestItem.transform.position != Vector3.zero
-            && ((itemlen < 15)
-                || (actions.Count > 0 && actions.First.Value is WaitUntilLosingAction && itemlen < 30 )))
+            && ((itemlen < 10)
+                || (actions.Count > 0 && actions.First.Value is WaitUntilLosingAction && itemlen < 20 )))
         {
             if (actions.Count == 0 || !(actions.First.Value is MoveToItemAction)) {
                 addPriorityAction (character, new MoveToItemAction (nearestItem));
@@ -240,9 +240,10 @@ public class jortssquad : MonoBehaviour
                     bestObj = leftObjective;
                 }
             }
-            addAction(character, new MoveAction(bestObj.getObjectiveLocation()));
-            addAction(character, new CapturePointAction(bestObj));
-            addAction(character, new WaitUntilLosingAction());
+                
+            addAction (character, new MoveAction (bestObj.getObjectiveLocation ()));
+            addAction (character, new CapturePointAction (bestObj));
+            addAction (character, new WaitUntilLosingAction ());
         }
         pruneList(actions, character);
         if (actions.Count > 0)
@@ -697,7 +698,7 @@ public class jortssquad : MonoBehaviour
     {
         public override bool isComplete(CharacterScript character)
         {
-            return getNumberOfObjectivesTheyHave() >= getNumberOfObjectivesWeHave();
+            return getNumberOfObjectivesTheyHave() >= 0;
         }
 
         public override float timeToComplete(CharacterScript character, bool isCurrentAction, Vector3 previousPos)
